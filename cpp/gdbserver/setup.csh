@@ -1,0 +1,1 @@
+setenv LD_LIBRARY_PATH /grid/common/pkgs/gcc/v6.3.0p1/lib:/grid/common/pkgs/gcc/v6.3.0p1/lib64

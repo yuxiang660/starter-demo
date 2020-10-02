@@ -1,0 +1,20 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "C++ Launch",
+        "type": "cppdbg",
+        "request": "launch",
+        "program": "/lan/cva/hsv-apfw/yuxiangw/GitHub/cadenceRepo/demo/gdbserver/main",
+        "miDebuggerServerAddress": "hsv-sc47:2000",
+        "args": [],
+        "stopAtEntry": true,
+        "cwd": "/lan/cva/hsv-apfw/yuxiangw/GitHub/cadenceRepo/demo/gdbserver",
+        "environment": [],
+        "externalConsole": true,
+        "linux": {
+          "MIMode": "gdb"
+        }
+      }
+    ]
+}

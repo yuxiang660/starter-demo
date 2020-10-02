@@ -1,0 +1,4 @@
+{
+  "python.pythonPath": "/grid/common/pkgs/python/v3.7.2/bin/python3",
+  "python.envFile": "${workspaceFolder}/.env"
+}
