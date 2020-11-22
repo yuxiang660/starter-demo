@@ -1,3 +1,6 @@
+# Please "allow less secure apps: ON" for your gmail account.
+# Refer to https://realpython.com/python-send-email/
+
 import smtplib, ssl
 
 port = 465  # For SSL
