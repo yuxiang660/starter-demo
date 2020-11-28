@@ -1,0 +1,14 @@
+{
+  "cnt4": {
+      "test_log_file": "http://quark/lan/cva/hsv-apfw/yuxiangw/log/jenkins/ap2/20201126-072829/cnt4.log.20.11.204.d000",
+      "run_time": 38.41,
+      "pass": true,
+      "timestamp": "2020-11-26T07:28:30"
+  },
+  "lpddr_unit": {
+      "test_log_file": "http://quark/lan/cva/hsv-apfw/yuxiangw/log/jenkins/ap2/20201126-072829/lpddr_unit.log.20.11.204.d000",
+      "run_time": 38.47,
+      "pass": true,
+      "timestamp": "2020-11-26T07:28:30"
+  }
+}

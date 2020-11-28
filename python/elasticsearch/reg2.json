@@ -1,0 +1,26 @@
+{
+  "cnt4": {
+      "test_log_file": "http://quark/lan/cva/hsv-apfw/yuxiangw/log/jenkins/ap2/20201126-221426/cnt4.log.20.11.204.d000",
+      "run_time": 38.18,
+      "pass": true,
+      "timestamp": "2020-11-26T22:14:23"
+  },
+  "sod_su_unit_test": {
+      "test_log_file": "http://quark/lan/cva/hsv-apfw/yuxiangw/log/jenkins/ap2/20201126-221426/sod_su_unit_test.log.20.11.204.d000",
+      "run_time": 22.46,
+      "pass": false,
+      "timestamp": "2020-11-26T22:14:24"
+  },
+  "target_unit_test": {
+      "test_log_file": "http://quark/lan/cva/hsv-apfw/yuxiangw/log/jenkins/ap2/20201126-221426/target_unit_test.log.20.11.204.d000",
+      "run_time": 22.72,
+      "pass": false,
+      "timestamp": "2020-11-26T22:14:25"
+  },
+  "target_lane_unit_test": {
+      "test_log_file": "http://quark/lan/cva/hsv-apfw/yuxiangw/log/jenkins/ap2/20201126-221426/target_lane_unit_test.log.20.11.204.d000",
+      "run_time": 22.83,
+      "pass": false,
+      "timestamp": "2020-11-26T22:14:26"
+  }
+}
