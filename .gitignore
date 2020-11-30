@@ -153,6 +153,10 @@ dmypy.json
 *.lai
 *.la
 *.a
+!libgmock.a
+!libgmock_main.a
+!libgtest.a
+!libgtest_main.a
 *.lib
 
 # Executables
