@@ -4,6 +4,7 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
+                "${workspaceFolder}/google_test/framework/include",
                 "/opt/ActiveTcl-8.6/include"
             ],
             "defines": [],
