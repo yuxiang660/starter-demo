@@ -1,27 +1,45 @@
-GOOGLE_TEST_INCLUDE_PATH = ./framework/include
-GOOGLE_TEST_LIB_PATH = ./framework/lib
+GOOGLE_TEST_INCLUDE_PATH := ./include
+GOOGLE_TEST_LIB_PATH := ./lib
 
-G++ = /grid/common/pkgs/gcc/v9.3.0/bin/g++
-LD_PATH = /grid/common/pkgs/gccv9.3.0/lib:/grid/common/pkgs/gcc/v9.3.0/lib64
+INCLUDE  := -I $(GOOGLE_TEST_INCLUDE_PATH)
 
-C_FLAGS = -g -c -Wall -I $(GOOGLE_TEST_INCLUDE_PATH)
-LD_FLAGS = -L $(GOOGLE_TEST_LIB_PATH) -lgtest -lpthread
+CXX      := /grid/common/pkgs/gcc/v9.3.0/bin/g++
+CXXFLAGS := -pedantic-errors -Wall -Wextra -Werror
+LDFLAGS  := -L $(GOOGLE_TEST_LIB_PATH) -lgtest -lpthread
+BUILD    := ./build
+OBJ_DIR  := $(BUILD)/objects
+APP_DIR  := $(BUILD)/apps
+RUNTIME_LD_PATH := /grid/common/pkgs/gccv9.3.0/lib:/grid/common/pkgs/gcc/v9.3.0/lib64
 
-OBJECTS = main.o foo.o foo_test.o
-TARGET = main
+TARGET   := unit_test
+SRC      := $(wildcard src/*.C)
+OBJECTS  := $(SRC:%.C=$(OBJ_DIR)/%.o)
 
-all: $(TARGET)
+all: $(APP_DIR)/$(TARGET)
 
-$(TARGET): $(OBJECTS)
-	$(G++) -o $(TARGET) $(OBJECTS) $(LD_FLAGS)
+$(OBJ_DIR)/%.o: %.C
+	@mkdir -p $(@D)
+	$(CXX) $(CXXFLAGS) $(INCLUDE) -c $< -o $@
 
-%.o : %.cpp
-	$(G++) $(C_FLAGS) $<
+$(APP_DIR)/$(TARGET): $(OBJECTS)
+	@mkdir -p $(@D)
+	$(CXX) $(CXXFLAGS) -o $(APP_DIR)/$(TARGET) $^ $(LDFLAGS)
+
+.PHONY: all clean debug run help
+
+debug: CXXFLAGS += -DDEBUG -g
+debug: all
 
 clean:
-	rm -f $(TARGET) $(OBJECTS)
+	@rm -rvf $(BUILD)
 
 run:
-	@export LD_LIBRARY_PATH=$(LD_PATH) && ./$(TARGET)
+	@export LD_LIBRARY_PATH=$(RUNTIME_LD_PATH) && $(APP_DIR)/$(TARGET)
 
-.PHONY: all clean
+help:
+	@echo "	make - build unit test excutable file: $(APP_DIR)/$(TARGET)"
+	@echo "	make debug - build debug version unit tests"
+	@echo "	make run - run all unit tests"
+	@echo "	make clean - remove all build files"
+
+
