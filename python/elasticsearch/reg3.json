@@ -1,0 +1,20 @@
+{
+  "bbb": {
+      "test_log_file": "http://quark/lan/cva/hsv-apfw/yuxiangw/log/jenkins/ap2_emu/20201126-093614/cnt4.log.20.11.204.d000",
+      "run_time": 933.36,
+      "pass": true,
+      "timestamp": "2020-11-26T09:36:23"
+  },
+  "aaa": {
+      "test_log_file": "http://quark/lan/cva/hsv-apfw/yuxiangw/log/jenkins/ap2_emu/20201126-093614/lpddr_unit.log.20.11.204.d000",
+      "run_time": 1067.02,
+      "pass": true,
+      "timestamp": "2020-11-26T09:36:23"
+  },
+  "ccc": {
+      "test_log_file": "http://quark/lan/cva/hsv-apfw/yuxiangw/log/jenkins/ap2_emu/20201126-093614/2sd_2su_cnt32.log.20.11.204.d000",
+      "run_time": null,
+      "pass": false,
+      "timestamp": "2020-11-26T09:36:23"
+  }
+}
