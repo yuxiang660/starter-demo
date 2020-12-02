@@ -1,9 +1,12 @@
+.PHONY: all main run
+
 all: main
 
 main: main.cpp
-	gcc -Wall -o $@ $< ./shared_lib/libfoo.so ./shared_lib/bar
+	gcc -Wall -o $@ $< -L./shared_lib -lfoo ./shared_lib/bar
 
-.PHONY: all main
+run:
+	@export LD_LIBRARY_PATH=./shared_lib && ./main
 
 clean:
 	@rm -rf main
