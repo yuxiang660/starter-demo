@@ -2,5 +2,7 @@
 
 #include <stdio.h>
 
-void say_bar();
+extern "C" {
+   void say_bar();
+}
 
