@@ -164,3 +164,6 @@ dmypy.json
 *.out
 *.app
 main
+
+# shared_lib
+bar
