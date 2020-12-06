@@ -1,6 +1,6 @@
 #include <stdio.h>
-#include "./shared_lib/bar.h"
-#include "./shared_lib/foo.h"
+#include "./../shared_lib/bar.h"
+#include "./../shared_lib/foo.h"
  
 int main(void)
 {
