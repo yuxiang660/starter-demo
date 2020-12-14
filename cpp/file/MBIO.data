@@ -1,0 +1,6 @@
+# Specify the destination SD index
+SD_TO = 0
+# Specify the rx lane index of the destination SD index
+SD_RX_LANE = 0
+# Specify expected delay value
+EXPECTED_MBIO_DELAY = 38
