@@ -123,13 +123,13 @@ def add_domain_indexes_between_section(domain_indexes, left_word, right_word):
         left_domain = (board + 1) * 8
     else:
         board = int(float(left_word))
-        left_domain = board + int(float(left_word) * 10 % 10) + 1
+        left_domain = board * 8 + int(float(left_word) * 10 % 10) + 1
     if '.' not in right_word:
         board = int(right_word)
         right_domain = board * 8
     else:
         board = int(float(right_word))
-        right_domain = board + int(float(right_word) * 10 % 10)
+        right_domain = board * 8 + int(float(right_word) * 10 % 10)
     print(left_domain)
     print(right_domain)
     domain_indexes = sorted(set(domain_indexes + [x for x in range(left_domain, right_domain)]))
@@ -137,7 +137,7 @@ def add_domain_indexes_between_section(domain_indexes, left_word, right_word):
 
 def parse_boards_config():
     domain_indexes = []
-    words = re.split(r'(\+|\-)', '0.1+0.2-0.5+2-4')
+    words = re.split(r'(\+|\-)', '0.1+0.2-0.5+2-4+5.4-5.6')
     for word in words:
         if is_domain(word): domain_indexes = add_domain_indexes(domain_indexes, word)
     minus_position = []
