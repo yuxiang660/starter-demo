@@ -167,3 +167,6 @@ main
 
 # shared_lib
 bar
+
+# tcl/copy
+*.bak
