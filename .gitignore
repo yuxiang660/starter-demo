@@ -170,3 +170,6 @@ bar
 
 # tcl/copy
 *.bak
+
+# excel
+python/excel/output.csv
