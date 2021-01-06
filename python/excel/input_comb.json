@@ -1,0 +1,34 @@
+{
+    "2_domains": [
+        {
+            "title": "Relocation 0.2+0.3 for compile domains 0.0+0.1",
+            "pass": true,
+            "run_time": 0.42,
+            "build": "20.12.219.d000",
+            "log_file": "http://quark/grid/cva/p4_03/yuxiangw/ap2Tests/stress/output/utests/archive/20210106-010723/2_domains/run1.log"
+        },
+        {
+            "title": "Relocation 0.4+0.5 for compile domains 0.0+0.1",
+            "pass": true,
+            "run_time": 0.42,
+            "build": "20.12.219.d000",
+            "log_file": "http://quark/grid/cva/p4_03/yuxiangw/ap2Tests/stress/output/utests/archive/20210106-010723/2_domains/run2.log"
+        }
+    ],
+    "3_domains": [
+        {
+            "title": "Relocation 0.2+0.3+0.4 for compile domains 0.0+0.1+0.2",
+            "pass": true,
+            "run_time": 0.42,
+            "build": "20.12.219.d000",
+            "log_file": "http://quark/grid/cva/p4_03/yuxiangw/ap2Tests/stress/output/utests/archive/20210106-010723/3_domains/run1.log"
+        },
+        {
+            "title": "Relocation 0.2+0.4+0.5 for compile domains 0.0+0.1+0.2",
+            "pass": true,
+            "run_time": 0.42,
+            "build": "20.12.219.d000",
+            "log_file": "http://quark/grid/cva/p4_03/yuxiangw/ap2Tests/stress/output/utests/archive/20210106-010723/3_domains/run2.log"
+        }
+    ]
+}
