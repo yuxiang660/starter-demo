@@ -32,12 +32,24 @@ def convert_to_csv_format(raw_data):
     }
     return csv_data
 
-if __name__ == "__main__":
+def to_comb_csv():
     with open('input_comb.json', 'r') as f:
         summary = json.load(f)
     csv_list = []
     for _, test_results in summary.items():
         for raw_data in test_results:
             csv_list.append(convert_to_csv_format(raw_data))
+    pandas.DataFrame(csv_list).to_csv('output_comb.csv')
+
+def to_csv():
+    with open('input.json', 'r') as f:
+        test_results = json.load(f)
+    csv_list = []
+    for raw_data in test_results:
+        csv_list.append(convert_to_csv_format(raw_data))
     pandas.DataFrame(csv_list).to_csv('output.csv')
+
+if __name__ == "__main__":
+    to_comb_csv()
+    to_csv()
 
