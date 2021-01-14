@@ -10,7 +10,8 @@ if {[info exists ::env(EMULATOR)]} {
         puts "Emulator hsv-smd416"
     }
     default {
-        puts "Default Emulator"
+        puts "!!! Error: Emulator '$::env(EMULATOR)' does not have hdsb configuration. !!!"
+        exit 1
     }
   }
   puts "Your host is $::env(EMULATOR)"
