@@ -1,7 +1,8 @@
-set ::env(EMULATOR) hsv-smd415
+set ::env(EMULATOR) hsv-smd415.cadence.com
 
 if {[info exists ::env(EMULATOR)]} {
   switch $::env(EMULATOR) {
+    hsv-smd415.cadence.com -
     hsv-smd415 {
         puts "Emulator hsv-smd415"
     }
