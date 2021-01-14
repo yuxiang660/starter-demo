@@ -4,7 +4,7 @@ import unittest
 
 class SetupTestSuite(unittest.TestCase):
 
-    def test_setup(self):
+    def test_reloc_tester(self):
         mock_config = "mock_config"
         RelocTester.compile(mock_config)
 

@@ -1,4 +1,6 @@
-PY := /lan/cva/hsv-apfw/yuxiangw/common/bin/python3.8
+PY := python3
 
-TESTS_PATH := $(dir $(wildcard ./tests/*/.))
-$(info $(TESTS_PATH))
+tests:
+	@$(PY) -m unittest discover -p '*_tests.py' -v
+
+.PHONY: tests
