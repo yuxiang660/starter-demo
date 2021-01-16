@@ -1,0 +1,6 @@
+#!/usr/bin/env python3
+
+def check_drawer():
+    print("checking drawer")
+
+check_drawer()
