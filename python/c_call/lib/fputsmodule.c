@@ -3,6 +3,8 @@
 
 static PyObject *method_fputs(PyObject *self, PyObject *args)
 {
+   printf("[C-log] Calling c fputs function\n");
+
    char *str, *filename = NULL;
    int bytes_copied = -1;
 
