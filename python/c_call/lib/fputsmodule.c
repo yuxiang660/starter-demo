@@ -3,7 +3,6 @@
 
 static PyObject *method_fputs(PyObject *self, PyObject *args)
 {
-   printf("[C-log] Calling c fputs function\n");
 
    char *str, *filename = NULL;
    int bytes_copied = -1;
@@ -18,6 +17,8 @@ static PyObject *method_fputs(PyObject *self, PyObject *args)
    bytes_copied = fputs(str, fp);
    fclose(fp);
 
+   fprintf(stderr, "[C-LOG stderr] Calling c fputs\n");
+   fprintf(stdout, "[C-LOG stdout] Calling c fputs\n");
    return PyLong_FromLong(bytes_copied);
 }
 
