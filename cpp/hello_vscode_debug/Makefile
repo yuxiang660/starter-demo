@@ -1,7 +1,7 @@
-CC = /grid/common/pkgs/gcc/v6.3.0p1/bin/g++
+CC = g++
 CFLAGS  = -g
 TARGET = main
-LD_PATH = /grid/common/pkgs/gcc/v6.3.0p1/lib:/grid/common/pkgs/gcc/v6.3.0p1/lib64
+#LD_PATH = /grid/common/pkgs/gcc/v6.3.0p1/lib:/grid/common/pkgs/gcc/v6.3.0p1/lib64
 
 
 all: $(TARGET)
@@ -15,5 +15,5 @@ $(TARGET): $(TARGET).cpp
 clean:
 	/bin/sh -c 'rm -rf $(TARGET) $(TARGET).o'
 
-run:
-	@export LD_LIBRARY_PATH=$(LD_PATH) && ./$(TARGET) | c++filt -t
+# run:
+# 	@export LD_LIBRARY_PATH=$(LD_PATH) && ./$(TARGET) | c++filt -t
