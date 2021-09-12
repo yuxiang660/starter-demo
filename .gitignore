@@ -174,3 +174,6 @@ bar
 # excel
 python/excel/output.csv
 python/excel/output_comb.csv
+
+#solaris studio
+test.*.er/
