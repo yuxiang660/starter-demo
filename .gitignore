@@ -177,3 +177,10 @@ python/excel/output_comb.csv
 
 #solaris studio
 test.*.er/
+
+# socket
+server
+!server/
+client
+!client/
+*.pcap
