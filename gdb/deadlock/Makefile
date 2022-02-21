@@ -3,7 +3,7 @@ CFLAGS  = -g
 LFLAGS  = -lpthread
 TARGET = main
 
-all: $(TARGET)
+all: clean $(TARGET)
 
 .PHONY: clean run
 
