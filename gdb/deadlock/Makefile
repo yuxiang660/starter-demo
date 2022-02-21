@@ -15,3 +15,5 @@ main2:
 
 clean:
 	/bin/sh -c 'rm -rf $(TARGET)'
+
+# For deadlock.py usage, please refer to https://github.com/facebook/folly/tree/main/folly/experimental/gdb
