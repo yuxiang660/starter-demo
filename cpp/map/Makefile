@@ -1,7 +1,6 @@
 CC = g++
 CFLAGS  = -g
 TARGET = main
-LD_PATH = /grid/common/pkgs/gcc/v6.3.0p1/lib:/grid/common/pkgs/gcc/v6.3.0p1/lib64
 
 all: $(TARGET)
 
@@ -17,4 +16,7 @@ clean:
 	/bin/sh -c 'rm -rf $(TARGET)'
 
 run:
-	@export LD_LIBRARY_PATH=$(LD_PATH) && ./$(TARGET)
+	./$(TARGET)
+
+debug:
+	/usr/bin/gdbserver ${GDB_SERVER} ./$(TARGET)
