@@ -186,4 +186,6 @@ client
 *.pcap
 
 .vscode/
-python/**/*.html
+python/plotly/*.html
+python/plotly/*.svg
+python/plotly/*.png
