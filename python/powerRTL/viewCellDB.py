@@ -24,9 +24,62 @@ def checkArgs(args):
 
 
 class CellDB:
+    TOP_DATA = {"maxQtCellPinNum": "value0",
+                "stdInstPowerW": "value1",
+                "stdInstPinCapW": "value2",
+                "qtInstPinIds": "value3"}
+
     def __init__(self, file) -> None:
         with open(file) as f:
             self.data = json.load(f)
+        for _, value in self.data.items():
+            self._initMaxQtCellPinNum(value[self.TOP_DATA["maxQtCellPinNum"]])
+            self._initStdInstPowerW(value[self.TOP_DATA["stdInstPowerW"]])
+            self._initStdInstPinCapW(value[self.TOP_DATA["stdInstPinCapW"]])
+            self._initQtInstPinIds(value[self.TOP_DATA["qtInstPinIds"]])
+
+    def _initMaxQtCellPinNum(self, data):
+        self.maxQtCellPinNum = data
+        logging.debug(self.maxQtCellPinNum)
+
+    def _initStdInstPowerW(self, data):
+        self.stdInstPowerWDict = {}
+        for item in data:
+            gateId = item["key"]
+            self.stdInstPowerWDict.setdefault(gateId, {})
+            for value in item["value"]:
+                stdInstId = value["key"]
+                stdInstW = value["value"]
+                self.stdInstPowerWDict[gateId].update({stdInstId: stdInstW})
+        logging.debug(self.stdInstPowerWDict)
+
+    def _initStdInstPinCapW(self, data):
+        self.stdInstPinCapWDict = {}
+        for item in data:
+            gateId = item["key"]
+            self.stdInstPinCapWDict.setdefault(gateId, {})
+            for value in item["value"]:
+                stdInstId = value["key"]
+                stdInstPinCap = value["value"]
+                self.stdInstPinCapWDict[gateId].update(
+                    {stdInstId: stdInstPinCap})
+        logging.debug(self.stdInstPinCapWDict)
+
+    def _initQtInstPinIds(self, data):
+        self.qtInstPinIdsDict = {}
+        for item in data:
+            gateId = item["key"]
+            self.qtInstPinIdsDict.setdefault(gateId, {})
+            for value in item["value"]:
+                stdInstId = value["key"]
+                self.qtInstPinIdsDict[gateId].setdefault(stdInstId, {})
+                qtInstPinIds = value["value"]
+                for qtInstPinId in qtInstPinIds:
+                    qtInstId = qtInstPinId["key"]
+                    pinIdList = qtInstPinId["value"]
+                    self.qtInstPinIdsDict[gateId][stdInstId].update(
+                        {qtInstId: pinIdList})
+        logging.debug(self.qtInstPinIdsDict)
 
 
 class CellDBInst:
@@ -39,12 +92,15 @@ class CellDBInst:
     def __init__(self, file) -> None:
         with open(file) as f:
             self.data = json.load(f)
-        for key, value in self.data.items():
+        for _, value in self.data.items():
             self._initStdCellIdToName(value[self.TOP_DATA["stdCellIdToName"]])
             self._initQtCellIdToName(value[self.TOP_DATA["qtCellIdToName"]])
-            self._initQtCellPinIdToName(value[self.TOP_DATA["qtCellPinIdToName"]])
-            self._initStdInstIdToStdCellId(value[self.TOP_DATA["stdInstIdToStdCellId"]])
-            self._initQtInstIdToQtCellId(value[self.TOP_DATA["qtInstIdToQtCellId"]])
+            self._initQtCellPinIdToName(
+                value[self.TOP_DATA["qtCellPinIdToName"]])
+            self._initStdInstIdToStdCellId(
+                value[self.TOP_DATA["stdInstIdToStdCellId"]])
+            self._initQtInstIdToQtCellId(
+                value[self.TOP_DATA["qtInstIdToQtCellId"]])
 
     def _initStdCellIdToName(self, data):
         self.stdCellIdToNameList = data
