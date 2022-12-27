@@ -4,12 +4,11 @@ import json
 import os
 
 
-logging.basicConfig(level=logging.DEBUG,
+logging.basicConfig(level=logging.INFO,
                     format='[%(levelname)7s] | %(message)s')
 
 CELLDB_FILENAME = "swfvCellDB.json"
 CELLDB_INST_FILENAME = "swfvCellDB.inst.json"
-
 
 def checkArgs(args):
     if (not os.path.exists(args.dir)):
@@ -102,6 +101,15 @@ class CellDBInst:
             self._initQtInstIdToQtCellId(
                 value[self.TOP_DATA["qtInstIdToQtCellId"]])
 
+    def getNameByStdInstId(self, instId):
+        return self.stdCellIdToNameList[self.stdInstIdToStdCellIdList[instId]]
+
+    def getNameByQtInstId(self, instId):
+        return self.qtCellIdToNameList[self.qtInstIdToQtCellIdList[instId]]
+
+    def getNameByQtPinId(self, qtInstId, pinId):
+        return self.qtCellPinIdToNameDict[self.qtInstIdToQtCellIdList[qtInstId]][pinId]
+
     def _initStdCellIdToName(self, data):
         self.stdCellIdToNameList = data
         logging.debug(self.stdCellIdToNameList)
@@ -111,10 +119,10 @@ class CellDBInst:
         logging.debug(self.qtCellIdToNameList)
 
     def _initQtCellPinIdToName(self, data):
-        self.qtCellIdToNameDict = {}
+        self.qtCellPinIdToNameDict = {}
         for item in data:
-            self.qtCellIdToNameDict[item["key"]] = item["value"]
-        logging.debug(self.qtCellIdToNameDict)
+            self.qtCellPinIdToNameDict[item["key"]] = item["value"]
+        logging.debug(self.qtCellPinIdToNameDict)
 
     def _initStdInstIdToStdCellId(self, data):
         self.stdInstIdToStdCellIdList = data
@@ -125,16 +133,37 @@ class CellDBInst:
         logging.debug(self.qtInstIdToQtCellIdList)
 
 
+class Viewer:
+    CELLDB_LOG_FOLDER = "swfvCellDB.log"
+    def __init__(self, logDir) -> None:
+        self.logFolder = os.path.join(logDir, self.CELLDB_LOG_FOLDER)
+        os.makedirs(self.logFolder, exist_ok=True)
+
+
+    def viewInst(self, cellDBInst, cellDB):
+        for _, stdInsts in cellDB.qtInstPinIdsDict.items():
+            for stdInstId, qtInsts in stdInsts.items():
+                print(cellDBInst.getNameByStdInstId(stdInstId))
+                for qtInstId, pinIds in qtInsts.items():
+                    qtInst = cellDBInst.getNameByQtInstId(qtInstId) + "(" + str(qtInstId) + ") "
+                    pinNames = ", ".join(cellDBInst.getNameByQtPinId(qtInstId, pinId) for pinId in pinIds)
+                    print("\t\t" + qtInst + "[" + pinNames + "]")
+
+
+
 def main(args):
     checkArgs(args)
-    CellDB(os.path.join(args.dir, CELLDB_FILENAME))
-    CellDBInst(os.path.join(args.dir, CELLDB_INST_FILENAME))
-    pass
+    cellDB = CellDB(os.path.join(args.dir, CELLDB_FILENAME))
+    cellDBInst = CellDBInst(os.path.join(args.dir, CELLDB_INST_FILENAME))
+    viewer = Viewer(args.logDir)
+    viewer.viewInst(cellDBInst, cellDB)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='View swfvCellDB')
     parser.add_argument('-d', '--directory', dest='dir',
-                        default="./dbFiles", help='The dirctory of swfvCellDB JSON files')
+                        default="./dbFiles", help='The dirctory of CellDB JSON files')
+    parser.add_argument('-ld', '--log_directory', dest='logDir',
+                        default="./tmp", help='The log directory of the utitlity')
     args = parser.parse_args()
     main(args)
