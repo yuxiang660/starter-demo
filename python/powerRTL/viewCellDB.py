@@ -2,13 +2,15 @@ import argparse
 import logging
 import json
 import os
-
+import plotly.express as px
+import pandas as pd
 
 logging.basicConfig(level=logging.INFO,
                     format='[%(levelname)7s] | %(message)s')
 
 CELLDB_FILENAME = "swfvCellDB.json"
 CELLDB_INST_FILENAME = "swfvCellDB.inst.json"
+
 
 def checkArgs(args):
     if (not os.path.exists(args.dir)):
@@ -39,7 +41,7 @@ class CellDB:
 
     def _initMaxQtCellPinNum(self, data):
         self.maxQtCellPinNum = data
-        logging.debug(self.maxQtCellPinNum)
+        logging.debug(f"maxQtCellPinNum: {self.maxQtCellPinNum}")
 
     def _initStdInstPowerW(self, data):
         self.stdInstPowerWDict = {}
@@ -50,7 +52,7 @@ class CellDB:
                 stdInstId = value["key"]
                 stdInstW = value["value"]
                 self.stdInstPowerWDict[gateId].update({stdInstId: stdInstW})
-        logging.debug(self.stdInstPowerWDict)
+        logging.debug(f"stdInstPowerWDict: {self.stdInstPowerWDict}")
 
     def _initStdInstPinCapW(self, data):
         self.stdInstPinCapWDict = {}
@@ -62,7 +64,7 @@ class CellDB:
                 stdInstPinCap = value["value"]
                 self.stdInstPinCapWDict[gateId].update(
                     {stdInstId: stdInstPinCap})
-        logging.debug(self.stdInstPinCapWDict)
+        logging.debug(f"stdInstPinCapWDict: {self.stdInstPinCapWDict}")
 
     def _initQtInstPinIds(self, data):
         self.qtInstPinIdsDict = {}
@@ -78,7 +80,7 @@ class CellDB:
                     pinIdList = qtInstPinId["value"]
                     self.qtInstPinIdsDict[gateId][stdInstId].update(
                         {qtInstId: pinIdList})
-        logging.debug(self.qtInstPinIdsDict)
+        logging.debug(f"qtInstPinIdsDict: {self.qtInstPinIdsDict}")
 
 
 class CellDBInst:
@@ -112,43 +114,87 @@ class CellDBInst:
 
     def _initStdCellIdToName(self, data):
         self.stdCellIdToNameList = data
-        logging.debug(self.stdCellIdToNameList)
+        logging.debug(f"stdCellIdToNameList: {self.stdCellIdToNameList}")
 
     def _initQtCellIdToName(self, data):
         self.qtCellIdToNameList = data
-        logging.debug(self.qtCellIdToNameList)
+        logging.debug(f"qtCellIdToNameList: {self.qtCellIdToNameList}")
 
     def _initQtCellPinIdToName(self, data):
         self.qtCellPinIdToNameDict = {}
         for item in data:
             self.qtCellPinIdToNameDict[item["key"]] = item["value"]
-        logging.debug(self.qtCellPinIdToNameDict)
+        logging.debug(f"qtCellPinIdToNameDict: {self.qtCellPinIdToNameDict}")
 
     def _initStdInstIdToStdCellId(self, data):
         self.stdInstIdToStdCellIdList = data
-        logging.debug(self.stdInstIdToStdCellIdList)
+        logging.debug(f"stdInstIdToStdCellIdList: {self.stdInstIdToStdCellIdList}")
 
     def _initQtInstIdToQtCellId(self, data):
         self.qtInstIdToQtCellIdList = data
-        logging.debug(self.qtInstIdToQtCellIdList)
+        logging.debug(f"qtInstIdToQtCellIdList: {self.qtInstIdToQtCellIdList}")
 
 
 class Viewer:
     CELLDB_LOG_FOLDER = "swfvCellDB.log"
+
     def __init__(self, logDir) -> None:
         self.logFolder = os.path.join(logDir, self.CELLDB_LOG_FOLDER)
         os.makedirs(self.logFolder, exist_ok=True)
 
+    def _mergeByGateId(self, cellDBInst, cellDB):
+        stdInstInfo = {}  # key: stdInstId - {qtInstId: qtPinNameSet}, {'stdPowerW': num}, {'stdPinCapW': num}
+        for gateId, stdInsts in cellDB.qtInstPinIdsDict.items():
+            for stdInstId, qtInsts in stdInsts.items():
+                stdInstInfo.setdefault(stdInstId, {})
+                stdInstInfo[stdInstId].setdefault('stdPowerW', 0)
+                stdInstInfo[stdInstId].setdefault('stdPinCapW', 0)
+                stdInstInfo[stdInstId]['stdPowerW'] += cellDB.stdInstPowerWDict[gateId][stdInstId]
+                stdInstInfo[stdInstId]['stdPinCapW'] += cellDB.stdInstPinCapWDict[gateId][stdInstId]
+                for qtInstId, pinIds in qtInsts.items():
+                    stdInstInfo[stdInstId].setdefault(qtInstId, set())
+                    qtPinNames = [cellDBInst.getNameByQtPinId(qtInstId, pinId) for pinId in pinIds]
+                    qtPinNames = stdInstInfo[stdInstId][qtInstId] | set(qtPinNames)
+                    stdInstInfo[stdInstId].update({qtInstId: qtPinNames})
+        return stdInstInfo
 
     def viewInst(self, cellDBInst, cellDB):
-        for _, stdInsts in cellDB.qtInstPinIdsDict.items():
-            for stdInstId, qtInsts in stdInsts.items():
-                print(cellDBInst.getNameByStdInstId(stdInstId))
-                for qtInstId, pinIds in qtInsts.items():
-                    qtInst = cellDBInst.getNameByQtInstId(qtInstId) + "(" + str(qtInstId) + ") "
-                    pinNames = ", ".join(cellDBInst.getNameByQtPinId(qtInstId, pinId) for pinId in pinIds)
-                    print("\t\t" + qtInst + "[" + pinNames + "]")
+        dfData = []
+        for stdInstId, stdInstInfo in self._mergeByGateId(cellDBInst, cellDB).items():
+            dfItem = {}
+            stdInst = cellDBInst.getNameByStdInstId(stdInstId) + "(" + str(stdInstId) + ")"
+            dfItem.update({'stdInstName': stdInst})
+            stdInstPowerW = stdInstInfo['stdPowerW']
+            stdInstPinCapW = stdInstInfo['stdPinCapW']
+            numQtInsts = len(stdInstInfo) - 2
+            dfItem.update({'qtInfo': []})
+            for qtInstId, qtPins in stdInstInfo.items():
+                dfQtItem = {}
+                if not isinstance(qtInstId, int):
+                    continue
+                qtInst = cellDBInst.getNameByQtInstId(qtInstId) + "(" + str(qtInstId) + ") "
+                dfQtItem.update({'qtInstName': qtInst})
+                dfQtItem.update({'qtPinNames': ", ".join(qtPins)})
+                dfQtItem.update({'qtPowerAvgW': stdInstPowerW / numQtInsts})
+                dfQtItem.update({'qtPinCapAvgW': stdInstPinCapW / numQtInsts})
+                dfItem['qtInfo'].append(dfQtItem)
+            dfData.append(dfItem)
+        data = pd.json_normalize(dfData, "qtInfo", ["stdInstName"])
+        print(data)
+        df = pd.DataFrame(data)
+        fig = px.treemap(df, path=[px.Constant("top"), 'stdInstName', 'qtInstName'],
+                 values='qtPowerAvgW', hover_data=['qtPinNames'])
+        fig.update_traces(root_color="lightgrey")
+        fig.update_layout(margin=dict(t=50, l=25, r=25, b=25))
+        fig.write_image(os.path.join(self.logFolder, "instPowerW.svg"))
+        fig.write_html(os.path.join(self.logFolder, "instPowerW.html"))
 
+        fig2 = px.treemap(df, path=[px.Constant("top"), 'stdInstName', 'qtInstName'],
+                 values='qtPinCapAvgW', hover_data=['qtPinNames'])
+        fig2.update_traces(root_color="lightgrey")
+        fig2.update_layout(margin=dict(t=50, l=25, r=25, b=25))
+        fig2.write_image(os.path.join(self.logFolder, "instPinCapW.svg"))
+        fig2.write_html(os.path.join(self.logFolder, "instPinCapW.html"))
 
 
 def main(args):
