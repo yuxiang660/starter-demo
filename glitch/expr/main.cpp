@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <unordered_map>
+#include <map>
 #include <cassert>
 #include <string.h>
 #include <exception>
@@ -36,8 +36,9 @@ public:
 
 private:
     // arg1 op arg2
-    struct Node
+    class Node
     {
+    public:
         enum OP
         {
             NOT,
@@ -49,11 +50,11 @@ private:
         OP op = UNKNOWN;
         // index to argument index, arguments start with input pins
         // after input pins, the arguments are the nodes one by one
-        static const int NO_ARG = -1;
+        static constexpr int NO_ARG = -1;
         int arg1 = NO_ARG;
         int arg2 = NO_ARG;
 
-        std::string getOpName()
+        std::string getOpName() const
         {
             return op == NOT ? "NOT" :
                    op == AND ? "AND" :
@@ -61,7 +62,7 @@ private:
                    op == XOR ? "XOR" : "UNKNOWN";
         }
 
-        std::string getOpSym()
+        std::string getOpSym() const
         {
             return op == NOT ? "!" :
                    op == AND ? "&" :
@@ -177,7 +178,7 @@ private:
         if (!isalpha(*p))
             throw fvException("Invalid character '%c' in the expression", *p);
         int i;
-        for (i = 0; isalnum(*p) || *p == '[' || *p == ']' || *p == '_' || *p == '.' || *p == '\\' || *p == ' '; p++, i++)
+        for (i = 0; isalnum(*p) || *p == '[' || *p == ']' || *p == '_' || *p == '.' || *p == '\\'; p++, i++)
             var[i] = *p;
         var[i] = 0;
 
@@ -230,15 +231,30 @@ private:
         argStack.push_back(nodeId);
     }
 
+public:
+    void dump() const
+    {
+        printf("Expression: %s\n", m_expr.c_str());
+        for (const auto &[pin, id] : m_inPinIds)
+            printf("%10d: %s\n", id, pin.c_str());
+
+        int nodeId = m_inPinIds.size();
+        for (const auto &node: m_nodes)
+            printf("%10d: op %3s, arg1 %4d, arg2 %4d\n", nodeId++, node.getOpName().c_str(), node.arg1, node.arg2);
+    }
+
 private:
     std::string m_expr;
-    std::unordered_map<std::string, int> m_inPinIds;
+    std::map<std::string, int> m_inPinIds;
     std::vector<Node> m_nodes;
 };
 
 int main(int argc, char **argv)
 {
-    std::cout << "Boolean Expression Evaluator" << std::endl;
+    std::cout << "-- Boolean Expression Evaluator --" << std::endl;
+
+    BoolExpr expr1("(A & B)", {"A", "B"});
+    expr1.dump();
 
     return 0;
 }

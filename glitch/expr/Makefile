@@ -1,7 +1,7 @@
-CC = /grid/common/pkgs/gcc/v6.3.0p1/bin/g++
-CFLAGS  = -g
+CC = /grid/common/pkgs/gcc/v9.3.0p4/bin/g++
+CFLAGS  = -g -std=c++17
 TARGET = main
-LD_PATH = /grid/common/pkgs/gcc/v6.3.0p1/lib:/grid/common/pkgs/gcc/v6.3.0p1/lib64
+LD_PATH = /grid/common/pkgs/gcc/v9.3.0p4/lib:/grid/common/pkgs/gcc/v9.3.0p4/lib64
 
 
 all: $(TARGET)
