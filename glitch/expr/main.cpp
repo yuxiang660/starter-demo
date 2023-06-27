@@ -263,6 +263,54 @@ public:
             printf("%10d: op %3s, arg1 %4d, arg2 %4d\n", nodeId++, node.getOpName().c_str(), node.arg1, node.arg2);
     }
 
+    // pin0: bit0, pin1: bit1, ...
+    bool eval(uint64_t inVal)
+    {
+        std::vector<bool> nodesVal;
+        nodesVal.reserve(m_inPins.size() + m_nodes.size());
+        for (size_t i = 0; i < m_inPins.size(); i++)
+            nodesVal.push_back((inVal & (1 << i)) ? 1 : 0);
+
+        assert(!m_nodes.empty());
+        for (const auto &node : m_nodes)
+        {
+            switch(node.op)
+            {
+            case Node::NOT:
+            {
+                assert(node.arg1 < nodesVal.size());
+                nodesVal.push_back(!nodesVal[node.arg1]);
+                break;
+            }
+            case Node::AND:
+            {
+                assert(node.arg1 < nodesVal.size());
+                assert(node.arg2 < nodesVal.size());
+                nodesVal.push_back(nodesVal[node.arg1] && nodesVal[node.arg2]);
+                break;
+            }
+            case Node::OR:
+            {
+                assert(node.arg1 < nodesVal.size());
+                assert(node.arg2 < nodesVal.size());
+                nodesVal.push_back(nodesVal[node.arg1] || nodesVal[node.arg2]);
+                break;
+            }
+            case Node::XOR:
+            {
+                assert(node.arg1 < nodesVal.size());
+                assert(node.arg2 < nodesVal.size());
+                nodesVal.push_back(nodesVal[node.arg1] != nodesVal[node.arg2]);
+                break;
+            }
+            default:
+                assert(false);
+            }
+        }
+
+        return nodesVal.back();
+    }
+
 private:
     std::string m_expr;
     std::vector<std::string> m_inPins;
@@ -274,16 +322,26 @@ int main(int argc, char **argv)
 {
     std::cout << "-- Boolean Expression Evaluator --" << std::endl;
 
-    BoolExpr expr1("(A & B | A)", {"A", "C", "B"});
+    uint64_t inVal = 0x3;
+    BoolExpr expr1("(A & B | !A)", {"A", "C", "B"});
     expr1.dump();
+    printf("\tEval(0x%04x) = %d\n", inVal, expr1.eval(inVal));
+
     BoolExpr expr2("A'", {"A"});
     expr2.dump();
+    printf("\tEval(0x%04x) = %d\n", inVal, expr2.eval(inVal));
+
     BoolExpr expr3("A' B + A' & B", {"A", "B"});
     expr3.dump();
-    BoolExpr expr4("A' B ^ A' & B", {"A", "B"});
+    printf("\tEval(0x%04x) = %d\n", inVal, expr3.eval(inVal));
+
+    BoolExpr expr4("(A' B) ^ (A' | B)", {"A", "B"});
     expr4.dump();
+    printf("\tEval(0x%04x) = %d\n", inVal, expr4.eval(inVal));
+
     BoolExpr expr5("A ' | B", {"A", "B"});
     expr5.dump();
+    printf("\tEval(0x%04x) = %d\n", inVal, expr5.eval(inVal));
 
     return 0;
 }
