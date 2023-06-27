@@ -118,8 +118,15 @@ private:
                 int saveArg = argStack.back(); // current node's index
                 argStack.pop_back();
                 if (argStack.back() != Node::NO_ARG) // '(' invalid argument
-                    throw fvException("Syntax error in expression {%s}", m_expr.c_str());
+                    throw fvException("Syntax error in expression {%s}: invalid '('", m_expr.c_str());
                 argStack.back() = saveArg; // replace '(' invalid argument
+            }
+            else if (c == '\'')
+            {
+                if (argStack.empty() || argStack.back() == Node::NO_ARG)
+                    throw fvException("Syntax error in expression {%s}: \' does not have arg", m_expr.c_str());
+                opStack.push_back('!'); // convert ' to !, because createNode only support !
+                createNode(opStack, argStack); // "A'" node
             }
             else
             {
@@ -133,7 +140,7 @@ private:
             createNode(opStack, argStack);
 
         if (!opStack.empty() || argStack.size() != 1)
-            throw fvException("Syntax error in expression {%s}", m_expr.c_str());
+            throw fvException("Syntax error in expression {%s}: remaining ops(%zu) or args(%zu)", m_expr.c_str(), opStack.size(), argStack.size()-1);
     }
 
     // helper function for Expression::build
@@ -148,13 +155,28 @@ private:
         while (isspace(*p) && *(p + 1) != '.')
             p++;
 
+        auto replaceSpaceWithAnd = [](char *s) {
+            // judge if following space is AND, if so, replace it with '&' character
+            while (*s == ')') s++;
+            if (isspace(*s))
+            {
+                char *h = s;
+                while (isspace(*s)) s++;
+                if (*s == '(' || isalpha(*s) || *s == '!' || *s == '\'')
+                    *h = '&'; // after the space it is a valid node, so the space is AND
+            }
+        };
+
         // return operators
         switch (*p++)
         {
         case '\'':
-            return '!';
+        {
+            replaceSpaceWithAnd(p);
+            return '\''; // invert previous expression
+        }
         case '!':
-            return '!';
+            return '!'; // invert following expression
         case '*':
             return '&';
         case '&':
@@ -178,20 +200,18 @@ private:
         if (!isalpha(*p))
             throw fvException("Invalid character '%c' in the expression", *p);
         int i;
-        for (i = 0; isalnum(*p) || *p == '[' || *p == ']' || *p == '_' || *p == '.' || *p == '\\'; p++, i++)
+        bool inEscape = false;
+        for (i = 0; isalnum(*p) || *p == '[' || *p == ']' || *p == '_' || *p == '.' || *p == '\\' || (inEscape && *p == ' '); p++, i++)
+        {
+            if (*p == '\\')
+                inEscape = true;
+            else if (*p == ' ')
+                inEscape = false;
             var[i] = *p;
+        }
         var[i] = 0;
 
-        // judge if following space is AND, if so, replace it with '&' character
-        char *s = p; // keep p unchanged
-        while (*s == ')') s++;
-        if (isspace(*s))
-        {
-            char *h = s;
-            while (isspace(*s)) s++;
-            if (*s == '(' || isalpha(*s) || *s == '!' || *s == '\'')
-                *h = '&'; // after the space it is a valid node, so the space is AND
-        }
+        replaceSpaceWithAnd(p);
 
         return 'v';
     }
@@ -256,6 +276,10 @@ int main(int argc, char **argv)
 
     BoolExpr expr1("(A & B | A)", {"A", "C", "B"});
     expr1.dump();
+    BoolExpr expr2("A'", {"A"});
+    expr2.dump();
+    BoolExpr expr3("A' B + A B", {"A", "B"});
+    expr3.dump();
 
     return 0;
 }
