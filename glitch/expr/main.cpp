@@ -162,7 +162,7 @@ private:
             {
                 char *h = s;
                 while (isspace(*s)) s++;
-                if (*s == '(' || isalpha(*s) || *s == '!' || *s == '\'')
+                if (*s == '(' || isalpha(*s) || *s == '!' || *s == '\\')
                     *h = '&'; // after the space it is a valid node, so the space is AND
             }
         };
@@ -282,6 +282,8 @@ int main(int argc, char **argv)
     expr3.dump();
     BoolExpr expr4("A' B ^ A' & B", {"A", "B"});
     expr4.dump();
+    BoolExpr expr5("A ' | B", {"A", "B"});
+    expr5.dump();
 
     return 0;
 }
