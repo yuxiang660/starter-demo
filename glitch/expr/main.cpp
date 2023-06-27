@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <map>
+#include <unordered_map>
 #include <cassert>
 #include <string.h>
 #include <exception>
@@ -27,10 +27,10 @@ private:
 class BoolExpr
 {
 public:
-    explicit BoolExpr(const char *expr, std::vector<std::string> inPins) : m_expr(expr)
+    explicit BoolExpr(const char *expr, const std::vector<std::string> &inPins) : m_expr(expr), m_inPins(inPins)
     {
-        for (size_t i = 0; i < inPins.size(); i++)
-            m_inPinIds[inPins[i]] = i;
+        for (size_t i = 0; i < m_inPins.size(); i++)
+            m_inPinIds[m_inPins[i]] = i;
         buildExpr();
     }
 
@@ -235,8 +235,8 @@ public:
     void dump() const
     {
         printf("Expression: %s\n", m_expr.c_str());
-        for (const auto &[pin, id] : m_inPinIds)
-            printf("%10d: %s\n", id, pin.c_str());
+        for (const auto &pin : m_inPins)
+            printf("%10d: %s\n", m_inPinIds.at(pin), pin.c_str());
 
         int nodeId = m_inPinIds.size();
         for (const auto &node: m_nodes)
@@ -245,7 +245,8 @@ public:
 
 private:
     std::string m_expr;
-    std::map<std::string, int> m_inPinIds;
+    std::vector<std::string> m_inPins;
+    std::unordered_map<std::string, int> m_inPinIds;
     std::vector<Node> m_nodes;
 };
 
@@ -253,7 +254,7 @@ int main(int argc, char **argv)
 {
     std::cout << "-- Boolean Expression Evaluator --" << std::endl;
 
-    BoolExpr expr1("(A & B)", {"A", "B"});
+    BoolExpr expr1("(A & B | A)", {"A", "C", "B"});
     expr1.dump();
 
     return 0;
