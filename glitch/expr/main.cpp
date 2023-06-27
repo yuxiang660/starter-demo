@@ -278,8 +278,10 @@ int main(int argc, char **argv)
     expr1.dump();
     BoolExpr expr2("A'", {"A"});
     expr2.dump();
-    BoolExpr expr3("A' B + A B", {"A", "B"});
+    BoolExpr expr3("A' B + A' & B", {"A", "B"});
     expr3.dump();
+    BoolExpr expr4("A' B ^ A' & B", {"A", "B"});
+    expr4.dump();
 
     return 0;
 }
