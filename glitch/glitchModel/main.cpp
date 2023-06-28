@@ -278,7 +278,9 @@ public:
         for (size_t i = 0; i < m_inPins.size(); i++)
             nodesVal.push_back((inVal & (1 << i)) ? 1 : 0);
 
-        assert(!m_nodes.empty());
+        if (m_nodes.empty())
+            return nodesVal.front(); // buf gate
+
         for (const auto &node : m_nodes)
         {
             switch(node.op)
@@ -337,7 +339,9 @@ public:
     void dump() const
     {
         printf("Expression: %s\n", m_expr.expr().c_str());
-        for (const auto &[togglePinIds, glitchCoeff] : m_glitchCoeff)
+        if (m_glitchGenCoeff.empty())
+            printf("\tThis gate doesn't generate any glitch\n");
+        for (const auto &[togglePinIds, glitchCoeff] : m_glitchGenCoeff)
         {
             printf("\tToggle pins: %s, %s\n", m_inPins[togglePinIds & 0xFFFF].c_str(), m_inPins[togglePinIds >> 16].c_str());
             for (const auto &[highLowPinsVal, coeff] : glitchCoeff)
@@ -419,7 +423,7 @@ private:
                     // case4: output always changes when pinA and pinB toggle, so no glitch
                     coeff = 0.0;
                 }
-                m_glitchCoeff[togglePinIds][highLowPinsVal] = coeff;
+                m_glitchGenCoeff[togglePinIds][highLowPinsVal] = coeff;
             }
         }
     }
@@ -436,7 +440,7 @@ private:
     std::map<uint32_t, std::map<uint64_t, std::array<bool, 4>>> m_glitchTables;
     // key1 and key2 is same as m_glitchTables, the value is the glitch coefficient
     // when pinA and pinB is toggle and other pin's high/low value is key2
-    std::map<uint32_t, std::map<uint64_t, double>> m_glitchCoeff;
+    std::map<uint32_t, std::map<uint64_t, double>> m_glitchGenCoeff;
 };
 
 int main(int argc, char **argv)
@@ -467,6 +471,14 @@ int main(int argc, char **argv)
     GlitchGateModel gxor3("(A ^ B ^ C)", {"A", "B", "C"});
     gxor3.dump();
 
+    GlitchGateModel gmux2("((S I1) + (!S I0))", {"I0", "I1", "S"});
+    gmux2.dump();
+
+    GlitchGateModel gInv("!A", {"A"});
+    gInv.dump();
+
+    GlitchGateModel gBuf("A", {"A"});
+    gBuf.dump();
 
     return 0;
 }

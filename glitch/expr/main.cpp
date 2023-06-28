@@ -271,7 +271,9 @@ public:
         for (size_t i = 0; i < m_inPins.size(); i++)
             nodesVal.push_back((inVal & (1 << i)) ? 1 : 0);
 
-        assert(!m_nodes.empty());
+        if (m_nodes.empty())
+            return nodesVal.front(); // buf gate
+
         for (const auto &node : m_nodes)
         {
             switch(node.op)
@@ -342,6 +344,14 @@ int main(int argc, char **argv)
     BoolExpr expr5("A ' | B", {"A", "B"});
     expr5.dump();
     printf("\tEval(0x%04x) = %d\n", inVal, expr5.eval(inVal));
+
+    BoolExpr expr6("!A", {"A"});
+    expr6.dump();
+    printf("\tEval(0x%04x) = %d\n", inVal, expr6.eval(inVal));
+
+    BoolExpr expr7("A", {"A"});
+    expr7.dump();
+    printf("\tEval(0x%04x) = %d\n", inVal, expr7.eval(inVal));
 
     return 0;
 }
