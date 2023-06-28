@@ -391,18 +391,18 @@ private:
                 {
                     const uint64_t key2 = (in & ~pinABMask);
                     if ((in & pinABMask) == pinABVal00)
-                        m_glitchTables[pinABKey][key2][0] = out;
+                        m_glitchGenTable[pinABKey][key2][0] = out;
                     else if ((in & pinABMask) == pinABVal11)
-                        m_glitchTables[pinABKey][key2][1] = out;
+                        m_glitchGenTable[pinABKey][key2][1] = out;
                     else if ((in & pinABMask) == pinABVal01)
-                        m_glitchTables[pinABKey][key2][2] = out;
+                        m_glitchGenTable[pinABKey][key2][2] = out;
                     else // pinABVal10
-                        m_glitchTables[pinABKey][key2][3] = out;
+                        m_glitchGenTable[pinABKey][key2][3] = out;
                 }
             }
         }
 
-        for (const auto &[togglePinIds, glitchTables] : m_glitchTables)
+        for (const auto &[togglePinIds, glitchTables] : m_glitchGenTable)
         {
             for (const auto &[highLowPinsVal, outVal] : glitchTables)
             {
@@ -462,8 +462,8 @@ private:
     // key2: other pins value, pin0 is bit0, pinA and pinB's value should be zero here
     // value: four expression values when pinA and pinB's value is (0, 0), (1, 1), (0, 1), (1, 0),
     //        other pins' value is key2
-    std::map<uint32_t, std::map<uint64_t, std::array<bool, 4>>> m_glitchTables;
-    // key1 and key2 is same as m_glitchTables, the value is the glitch generate coefficient
+    std::map<uint32_t, std::map<uint64_t, std::array<bool, 4>>> m_glitchGenTable;
+    // key1 and key2 is same as m_glitchGenTable, the value is the glitch generate coefficient
     // when pinA and pinB is toggle and other pin's high/low value is key2
     std::map<uint32_t, std::map<uint64_t, double>> m_glitchGenCoeff;
     // key1 is the input pinA that have glitch, key2 is other pins value, pinA's value here should be zero here
