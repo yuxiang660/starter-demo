@@ -341,12 +341,12 @@ public:
         printf("Expression: %s\n", m_expr.expr().c_str());
         if (m_glitchGenCoeff.empty())
             printf("\tThis gate doesn't generate any glitch\n");
-        for (const auto &[togglePinIds, glitchCoeff] : m_glitchGenCoeff)
+        for (const auto &[togglePinIds, glitchGenCoeff] : m_glitchGenCoeff)
         {
             printf("\tToggle pins: %s, %s\n", m_inPins[togglePinIds & 0xFFFF].c_str(), m_inPins[togglePinIds >> 16].c_str());
-            for (const auto &[highLowPinsVal, coeff] : glitchCoeff)
+            for (const auto &[highLowPinsVal, genCoeff] : glitchGenCoeff)
             {
-                printf("\t\tOther pinVal: 0x%04x, coeff: %f\n", highLowPinsVal, coeff);
+                printf("\t\tOther pinVal: 0x%04x, genCoeff: %f\n", highLowPinsVal, genCoeff);
             }
         }
     }
@@ -394,12 +394,12 @@ private:
         {
             for (const auto &[highLowPinsVal, outVal] : glitchTables)
             {
-                double coeff = 0.0;
+                double genCoeff = 0.0;
                 if (outVal[0] == outVal[1] && outVal[1] == outVal[2] && outVal[2] == outVal[3])
                 {
                     // case1: output does change when the pinA and pinB toggles, so no glitch
                     // example: BUF gate
-                    coeff = 0.0;
+                    genCoeff = 0.0;
                 }
                 else if ((outVal[0] == outVal[1]) && (outVal[2] == outVal[3]))
                 {
@@ -408,22 +408,22 @@ private:
                     //        but the ouput value is different when the pinA and pinB toggle in different way,
                     //        so it always have glitch when pinA and pinB toggle, and no toggle delay time is required
                     // example: XOR gate
-                    coeff = 2.0;
+                    genCoeff = 2.0;
                 }
                 else if ((outVal[0] == outVal[1]) || (outVal[2] == outVal[3]))
                 {
                     // case3: only one toggle way keep output unchanged,
                     //        so when pinA toggles, it decides pinB toggle way, and it also requires the toggle delay time
                     // example: AND gate
-                    coeff = 0.5;
+                    genCoeff = 0.5;
                 }
                 else
                 {
                     assert((outVal[0] != outVal[1]) && (outVal[2] != outVal[3]));
                     // case4: output always changes when pinA and pinB toggle, so no glitch
-                    coeff = 0.0;
+                    genCoeff = 0.0;
                 }
-                m_glitchGenCoeff[togglePinIds][highLowPinsVal] = coeff;
+                m_glitchGenCoeff[togglePinIds][highLowPinsVal] = genCoeff;
             }
         }
     }
