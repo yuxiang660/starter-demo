@@ -265,6 +265,11 @@ public:
             printf("%10d: op %3s, arg1 %4d, arg2 %4d\n", nodeId++, node.getOpName().c_str(), node.arg1, node.arg2);
     }
 
+    std::string expr() const
+    {
+        return m_expr;
+    }
+
     // pin0: bit0, pin1: bit1, ..., max 64 pins
     bool eval(uint64_t inVal) const
     {
@@ -329,6 +334,19 @@ public:
         createGlitchModel();
     }
 
+    void dump() const
+    {
+        printf("Expression: %s\n", m_expr.expr().c_str());
+        for (const auto &[togglePinIds, glitchCoeff] : m_glitchCoeff)
+        {
+            printf("\tToggle pins: %s, %s\n", m_inPins[togglePinIds & 0xFFFF].c_str(), m_inPins[togglePinIds >> 16].c_str());
+            for (const auto &[highLowPinsVal, coeff] : glitchCoeff)
+            {
+                printf("\t\tOther pinVal: 0x%04x, coeff: %f\n", highLowPinsVal, coeff);
+            }
+        }
+    }
+
 private:
     void setTruthTable()
     {
@@ -349,29 +367,28 @@ private:
             {
                 // Pickup two input pins for glitch toggle trigger
                 const uint32_t pinABKey = (pinBId << 16) | pinAId;
-                const uint64_t pinABMask = ~((1 << pinAId) | (1 << pinBId));
-                const uint64_t pinABVal0 = (0 << pinAId) | (0 << pinBId);
-                const uint64_t pinABVal1 = (1 << pinAId) | (1 << pinBId);
-                const uint64_t pinABVal2 = (0 << pinAId) | (1 << pinBId);
-                const uint64_t pinABVal3 = (1 << pinAId) | (0 << pinBId);
+                const uint64_t pinABMask = (1ULL << pinAId) | (1ULL << pinBId);
+                const uint64_t pinABVal00 = (0ULL << pinAId) | (0ULL << pinBId);
+                const uint64_t pinABVal11 = (1ULL << pinAId) | (1ULL << pinBId);
+                const uint64_t pinABVal01 = (0ULL << pinAId) | (1ULL << pinBId);
                 for (const auto &[in, out]: m_truthTable)
                 {
-                    const uint64_t key2 = in & pinABMask;
-                    if ((in & ~pinABMask) == pinABVal0)
+                    const uint64_t key2 = (in & ~pinABMask);
+                    if ((in & pinABMask) == pinABVal00)
                         m_glitchTables[pinABKey][key2][0] = out;
-                    else if ((in & ~pinABMask) == pinABVal1)
+                    else if ((in & pinABMask) == pinABVal11)
                         m_glitchTables[pinABKey][key2][1] = out;
-                    else if ((in & ~pinABMask) == pinABVal2)
+                    else if ((in & pinABMask) == pinABVal01)
                         m_glitchTables[pinABKey][key2][2] = out;
-                    else
+                    else // pinABVal10
                         m_glitchTables[pinABKey][key2][3] = out;
                 }
             }
         }
 
-        for (const auto &[togglePins, glitchTables] : m_glitchTables)
+        for (const auto &[togglePinIds, glitchTables] : m_glitchTables)
         {
-            for (const auto &[highLowPins, outVal] : glitchTables)
+            for (const auto &[highLowPinsVal, outVal] : glitchTables)
             {
                 double coeff = 0.0;
                 if (outVal[0] == outVal[1] && outVal[1] == outVal[2] && outVal[2] == outVal[3])
@@ -402,14 +419,14 @@ private:
                     // case4: output always changes when pinA and pinB toggle, so no glitch
                     coeff = 0.0;
                 }
-                m_glitchCoeff[togglePins][highLowPins] = coeff;
+                m_glitchCoeff[togglePinIds][highLowPinsVal] = coeff;
             }
         }
     }
 
 private:
     const BoolExpr m_expr;
-    const std::vector<std::string> &m_inPins;
+    std::vector<std::string> m_inPins;
     // key: input value; value: expression value
     std::map<uint64_t, bool> m_truthTable;
     // key1: two toggle pins' index, (pinB_Id << 16) | (pinA_Id)
@@ -426,7 +443,8 @@ int main(int argc, char **argv)
 {
     std::cout << "-- Boolean Expression Evaluator --" << std::endl;
 
-    GlitchGateModel gate("(A * B)", {"A", "B"});
+    GlitchGateModel gAnd("(A * B)", {"A", "B"});
+    gAnd.dump();
 
     return 0;
 }
