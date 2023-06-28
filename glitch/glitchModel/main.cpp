@@ -443,8 +443,30 @@ int main(int argc, char **argv)
 {
     std::cout << "-- Boolean Expression Evaluator --" << std::endl;
 
-    GlitchGateModel gAnd("(A * B)", {"A", "B"});
-    gAnd.dump();
+    GlitchGateModel gAnd2("(A * B)", {"A", "B"});
+    gAnd2.dump();
+
+    GlitchGateModel gAnd3("(A * B * C)", {"A", "B", "C"});
+    gAnd3.dump();
+
+    GlitchGateModel gAnd4("(A  B  C  D)", {"A", "B", "C", "D"});
+    gAnd4.dump();
+
+    GlitchGateModel gor2("(A | B)", {"A", "B"});
+    gor2.dump();
+
+    GlitchGateModel gor3("(A | B | C)", {"A", "B", "C"});
+    gor3.dump();
+
+    GlitchGateModel gor4("(A | B | C | D)", {"A", "B", "C", "D"});
+    gor4.dump();
+
+    GlitchGateModel gxor2("(A ^ B)", {"A", "B"});
+    gxor2.dump();
+
+    GlitchGateModel gxor3("(A ^ B ^ C)", {"A", "B", "C"});
+    gxor3.dump();
+
 
     return 0;
 }
