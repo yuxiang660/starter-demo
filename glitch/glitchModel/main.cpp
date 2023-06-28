@@ -339,6 +339,8 @@ public:
     void dump() const
     {
         printf("Expression: %s\n", m_expr.expr().c_str());
+
+        printf("  Glitch Generation Info:\n");
         if (m_glitchGenCoeff.empty())
             printf("\tThis gate doesn't generate any glitch\n");
         for (const auto &[togglePinIds, glitchGenCoeff] : m_glitchGenCoeff)
@@ -347,6 +349,16 @@ public:
             for (const auto &[highLowPinsVal, genCoeff] : glitchGenCoeff)
             {
                 printf("\t\tOther pinVal: 0x%04x, genCoeff: %f\n", highLowPinsVal, genCoeff);
+            }
+        }
+
+        printf("  Glitch Propagation Info:\n");
+        for (const auto &[togglePinId, glitchPropFlag] : m_glitchPropFlag)
+        {
+            printf("\tPin that have glitch: %s\n", m_inPins[togglePinId].c_str());
+            for (const auto &[highLowPinsVal, flags] : glitchPropFlag)
+            {
+                printf("\t\tOther pinVal: 0x%04x, propagate glitch: %s\n", highLowPinsVal, ((flags[0] != flags[1])?"true":"false"));
             }
         }
     }
@@ -426,6 +438,19 @@ private:
                 m_glitchGenCoeff[togglePinIds][highLowPinsVal] = genCoeff;
             }
         }
+
+        for (uint16_t pinAId = 0; pinAId < m_inPins.size(); pinAId++)
+        {
+            const uint64_t pinAMask = (1ULL << pinAId);
+            for (const auto &[in, out]: m_truthTable)
+            {
+                const uint64_t key2 = (in & ~pinAMask);
+                if ((in & pinAMask) == 0ULL) // pinA is low
+                    m_glitchPropFlag[pinAId][key2][0] = out;
+                else // pinA is high
+                    m_glitchPropFlag[pinAId][key2][1] = out;
+            }
+        }
     }
 
 private:
@@ -435,12 +460,16 @@ private:
     std::map<uint64_t, bool> m_truthTable;
     // key1: two toggle pins' index, (pinB_Id << 16) | (pinA_Id)
     // key2: other pins value, pin0 is bit0, pinA and pinB's value should be zero here
-    // value: four the expression values for when pinA and pinB's value is (0, 0), (1, 1), (0, 1), (1, 0),
+    // value: four expression values when pinA and pinB's value is (0, 0), (1, 1), (0, 1), (1, 0),
     //        other pins' value is key2
     std::map<uint32_t, std::map<uint64_t, std::array<bool, 4>>> m_glitchTables;
-    // key1 and key2 is same as m_glitchTables, the value is the glitch coefficient
+    // key1 and key2 is same as m_glitchTables, the value is the glitch generate coefficient
     // when pinA and pinB is toggle and other pin's high/low value is key2
     std::map<uint32_t, std::map<uint64_t, double>> m_glitchGenCoeff;
+    // key1 is the input pinA that have glitch, key2 is other pins value, pinA's value here should be zero here
+    // value: two expression values when pinA is low or pinA is high, other pins' value is key2. If the two values
+    //        are different, it means that the glitch from pinA can be propagated when other pins' value is key2
+    std::map<uint32_t, std::map<uint64_t, std::array<bool, 2>>> m_glitchPropFlag;
 };
 
 int main(int argc, char **argv)
@@ -471,7 +500,7 @@ int main(int argc, char **argv)
     GlitchGateModel gxor3("(A ^ B ^ C)", {"A", "B", "C"});
     gxor3.dump();
 
-    GlitchGateModel gmux2("((S I1) + (!S I0))", {"I0", "I1", "S"});
+    GlitchGateModel gmux2("((S B) + (!S A))", {"A", "B", "S"});
     gmux2.dump();
 
     GlitchGateModel gInv("!A", {"A"});
