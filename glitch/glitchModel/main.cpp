@@ -66,14 +66,6 @@ private:
                    op == XOR ? "XOR" : "UNKNOWN";
         }
 
-        std::string getOpSym() const
-        {
-            return op == NOT ? "!" :
-                   op == AND ? "&" :
-                   op == OR ? "|" :
-                   op == XOR ? "^" : "UNKNOWN";
-        }
-
         static int getOpPri(char op)
         {
             return op == '!' ? 3 :
