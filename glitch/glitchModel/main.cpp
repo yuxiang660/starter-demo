@@ -274,8 +274,8 @@ public:
     bool eval(uint64_t inVal) const
     {
         std::vector<bool> nodesVal;
-        nodesVal.reserve(m_inPins.size() + m_nodes.size());
-        for (size_t i = 0; i < m_inPins.size(); i++)
+        nodesVal.reserve(m_inPinIds.size() + m_nodes.size());
+        for (size_t i = 0; i < m_inPinIds.size(); i++)
             nodesVal.push_back((inVal & (1 << i)) ? 1 : 0);
 
         if (m_nodes.empty())
