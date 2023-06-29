@@ -10,6 +10,8 @@
 #include <utility>
 #include <cmath>
 #include <array>
+#include <sstream>
+#include <iomanip>
 
 class fvException : public std::runtime_error {
 public:
@@ -251,16 +253,24 @@ private:
 public:
     void dump() const
     {
-        printf("Expression: %s\n", m_expr.c_str());
+        std::stringstream ss;
+        ss << "Expression: " << m_expr << std::endl;
+
         std::vector<std::string> pinNames(m_inPinIds.size());
         for (const auto &[name, id] : m_inPinIds)
             pinNames[id] = name;
         for (const auto &pin : pinNames)
-            printf("%10d: %s\n", m_inPinIds.at(pin), pin.c_str());
+            ss << std::setw(10) << std::right << m_inPinIds.at(pin) << ": " << pin << std::endl;
 
         int nodeId = m_inPinIds.size();
         for (const auto &node: m_nodes)
-            printf("%10d: op %3s, arg1 %4d, arg2 %4d\n", nodeId++, node.getOpName().c_str(), node.arg1, node.arg2);
+            ss << std::setw(10) << std::right << nodeId++
+               << ": op " << std::setw(3) << node.getOpName()
+               << ", arg1 " << std::setw(4) << node.arg1
+               << ", arg2 " << std::setw(4) << node.arg2
+               << std::endl;
+
+        printf("%s", ss.str().c_str());
     }
 
     // pin0: bit0, pin1: bit1, ..., max 64 pins
@@ -280,28 +290,28 @@ public:
             {
             case Node::NOT:
             {
-                assert(node.arg1 < nodesVal.size());
+                assert(node.arg1 < (int)nodesVal.size() && node.arg1 != Node::NO_ARG);
                 nodesVal.push_back(!nodesVal[node.arg1]);
                 break;
             }
             case Node::AND:
             {
-                assert(node.arg1 < nodesVal.size());
-                assert(node.arg2 < nodesVal.size());
+                assert(node.arg1 < (int)nodesVal.size() && node.arg1 != Node::NO_ARG);
+                assert(node.arg2 < (int)nodesVal.size() && node.arg2 != Node::NO_ARG);
                 nodesVal.push_back(nodesVal[node.arg1] && nodesVal[node.arg2]);
                 break;
             }
             case Node::OR:
             {
-                assert(node.arg1 < nodesVal.size());
-                assert(node.arg2 < nodesVal.size());
+                assert(node.arg1 < (int)nodesVal.size() && node.arg1 != Node::NO_ARG);
+                assert(node.arg2 < (int)nodesVal.size() && node.arg2 != Node::NO_ARG);
                 nodesVal.push_back(nodesVal[node.arg1] || nodesVal[node.arg2]);
                 break;
             }
             case Node::XOR:
             {
-                assert(node.arg1 < nodesVal.size());
-                assert(node.arg2 < nodesVal.size());
+                assert(node.arg1 < (int)nodesVal.size() && node.arg1 != Node::NO_ARG);
+                assert(node.arg2 < (int)nodesVal.size() && node.arg2 != Node::NO_ARG);
                 nodesVal.push_back(nodesVal[node.arg1] != nodesVal[node.arg2]);
                 break;
             }
