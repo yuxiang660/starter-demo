@@ -212,7 +212,8 @@ private:
 
     void createNode(std::vector<char> &opStack, std::vector<int> &argStack)
     {
-        assert(!opStack.empty() && !argStack.empty() && argStack.back() != Node::NO_ARG);
+        if (opStack.empty() || argStack.empty() || argStack.back() == Node::NO_ARG)
+            throw fvException("No op or arg when creating expression node");
 
         Node n;
 
@@ -230,12 +231,14 @@ private:
         case '|':
         case '&':
         case '^':
-            assert(!argStack.empty() && argStack.back() != Node::NO_ARG);
+        {
+            if (argStack.empty() || argStack.back() == Node::NO_ARG)
+                throw fvException("No arg when creating expression node");
             n.arg2 = argStack.back();
             argStack.pop_back();
-            n.op = opcode == '|' ? Node::OR :
-                   opcode == '&' ? Node::AND : Node::XOR;
+            n.op = opcode == '|' ? Node::OR : opcode == '&' ? Node::AND : Node::XOR;
             break;
+        }
         default:
             assert(false);
         }
@@ -249,17 +252,15 @@ public:
     void dump() const
     {
         printf("Expression: %s\n", m_expr.c_str());
-        for (const auto &pin : m_inPins)
+        std::vector<std::string> pinNames(m_inPinIds.size());
+        for (const auto &[name, id] : m_inPinIds)
+            pinNames[id] = name;
+        for (const auto &pin : pinNames)
             printf("%10d: %s\n", m_inPinIds.at(pin), pin.c_str());
 
         int nodeId = m_inPinIds.size();
         for (const auto &node: m_nodes)
             printf("%10d: op %3s, arg1 %4d, arg2 %4d\n", nodeId++, node.getOpName().c_str(), node.arg1, node.arg2);
-    }
-
-    std::string expr() const
-    {
-        return m_expr;
     }
 
     // pin0: bit0, pin1: bit1, ..., max 64 pins
@@ -330,7 +331,8 @@ public:
 
     void dump() const
     {
-        printf("Expression: %s\n", m_expr.expr().c_str());
+        printf("------------------------------------------------------------------\n");
+        m_expr.dump();
 
         printf("  Glitch Generation Info:\n");
         if (m_glitchGenCoeff.empty())
@@ -353,6 +355,7 @@ public:
                 printf("\t\tOther pinVal: 0x%04x, propagate glitch: %s\n", highLowPinsVal, ((flags[0] != flags[1])?"true":"false"));
             }
         }
+        printf("------------------------------------------------------------------\n\n");
     }
 
 private:
