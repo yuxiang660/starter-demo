@@ -251,7 +251,7 @@ private:
     }
 
 public:
-    void dump() const
+    std::string dump() const
     {
         std::stringstream ss;
         ss << "Expression: " << m_expr << std::endl;
@@ -266,11 +266,11 @@ public:
         for (const auto &node: m_nodes)
             ss << std::setw(10) << std::right << nodeId++
                << ": op " << std::setw(3) << node.getOpName()
-               << ", arg1 " << std::setw(4) << node.arg1
-               << ", arg2 " << std::setw(4) << node.arg2
+               << ", arg1 " << std::setw(2) << node.arg1
+               << ", arg2 " << std::setw(2) << node.arg2
                << std::endl;
 
-        printf("%s", ss.str().c_str());
+        return ss.str();
     }
 
     // pin0: bit0, pin1: bit1, ..., max 64 pins
@@ -341,31 +341,39 @@ public:
 
     void dump() const
     {
-        printf("------------------------------------------------------------------\n");
-        m_expr.dump();
+        std::stringstream ss;
 
-        printf("  Glitch Generation Info:\n");
+        std::string separator(50, '-');
+        ss << separator << std::endl;
+
+        ss << "Glitch Model for Cell xxx" << std::endl;
+        ss << m_expr.dump();
+        ss << "  Generate:\n";
         if (m_glitchGenCoeff.empty())
-            printf("\tThis gate doesn't generate any glitch\n");
+            ss << "\tNo glitch generation\n";
         for (const auto &[togglePinIds, glitchGenCoeff] : m_glitchGenCoeff)
         {
-            printf("\tToggle pins: %s, %s\n", m_inPins[togglePinIds & 0xFFFF].c_str(), m_inPins[togglePinIds >> 16].c_str());
+            ss << "\tToggle pins: " << m_inPins[togglePinIds & 0xFFFF] << ", " << m_inPins[togglePinIds >> 16] << std::endl;
             for (const auto &[highLowPinsVal, genCoeff] : glitchGenCoeff)
             {
-                printf("\t\tOther pinVal: 0x%04x, genCoeff: %f\n", highLowPinsVal, genCoeff);
+                ss << "\t  Other(HL): 0x" << std::hex << std::setw(4) << std::setfill('0') << highLowPinsVal << std::dec
+                   << ", genCoeff: " << genCoeff << std::endl;
             }
         }
 
-        printf("  Glitch Propagation Info:\n");
+        ss << " Propagate:\n";
         for (const auto &[togglePinId, glitchPropFlag] : m_glitchPropFlag)
         {
-            printf("\tPin that have glitch: %s\n", m_inPins[togglePinId].c_str());
+            ss << "\t Glitch pin: " << m_inPins[togglePinId].c_str() << std::endl;
             for (const auto &[highLowPinsVal, flags] : glitchPropFlag)
             {
-                printf("\t\tOther pinVal: 0x%04x, propagate glitch: %s\n", highLowPinsVal, ((flags[0] != flags[1])?"true":"false"));
+                ss << "\t  Other(HL): 0x" << std::hex << std::setw(4) << std::setfill('0') << highLowPinsVal << std::dec
+                   << ", propagate: " << ((flags[0] != flags[1])?"true":"false") << std::endl;
             }
         }
-        printf("------------------------------------------------------------------\n\n");
+        ss << separator << "\n\n";
+
+        printf("%s", ss.str().c_str());
     }
 
 private:
