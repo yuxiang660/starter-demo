@@ -57,7 +57,7 @@ std::vector<std::string> parse_BPIO_data()
    return data;
 }
 
-std::vector<int> stov(const std::string& str)
+std::vector<int> stov(const std::string &str)
 {
    std::stringstream ss(str);
    std::vector<int> data;
@@ -91,7 +91,8 @@ int main()
    std::cout << "bpio sd_rx_lane: " << bpio_sd_rx_lane << std::endl;
    std::cout << "bpio expected_delay: " << bpio_expected_delay << std::endl;
    std::cout << "bpio bpio_all_sds: " << std::endl;
-   for (auto&& sd: bpio_all_sds) {
+   for (auto &&sd : bpio_all_sds)
+   {
       std::cout << sd << ", ";
    }
    std::cout << std::endl;
