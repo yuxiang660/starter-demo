@@ -3,6 +3,12 @@
 #include <algorithm>
 #include <fstream>
 
+void writeOnfile()
+{
+   std::ofstream myfile("text.log", std::fstream::app);
+   myfile << "aaa\n";
+}
+
 int main()
 {
    std::ofstream out;
@@ -21,6 +27,8 @@ int main()
    std::cout << "eof: " << out.eof() << std::endl;
    std::cout << "fail: " << out.fail() << std::endl;
    std::cout << "bad: " << out.bad() << std::endl;
+
+   writeOnfile();
 
    return 0;
 }
