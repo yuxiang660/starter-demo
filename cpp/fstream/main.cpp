@@ -2,10 +2,12 @@
 #include <iostream>
 #include <algorithm>
 #include <fstream>
+#include <assert.h>
 
 void writeOnfile()
 {
    std::ofstream myfile("text.log", std::fstream::app);
+   assert(myfile.good());
    myfile << "aaa\n";
 }
 
