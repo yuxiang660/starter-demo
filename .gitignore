@@ -193,3 +193,5 @@ python/plotly/*.png
 
 *.cache
 *.s
+
+*.sym
