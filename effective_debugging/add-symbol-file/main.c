@@ -3,6 +3,14 @@
 
 int main()
 {
+#ifdef NDEBUG
+   printf("define NDEBUG=%d\n", NDEBUG);
+#else
+   printf("not define NDEBUG\n");
+   printf("not define NDEBUG\n");
+   printf("not define NDEBUG\n");
+#endif
+
    init();
 
    for (int i = 0; i < 2; i++)
