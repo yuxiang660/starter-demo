@@ -196,3 +196,5 @@ python/plotly/*.png
 
 *.sym
 main_d
+
+*.class
